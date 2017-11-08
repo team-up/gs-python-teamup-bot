@@ -16,8 +16,16 @@ service.login(authentication)
 
 while True:
     events = service.get_events()
-    if events[0]:
-        print("!!!!!")
-        print(events[0].chat_event.user_index)
-    time.sleep(service.config['lp_idle_time'])
+    if events:
+        for event in events:
+            if event.chat_event:
+                chat = service.get_chat_summary(event.chat_event.room_index,
+                                                event.chat_event.msg_index)
 
+                if chat:
+                    print("채팅 옴 : {}".format(chat.content))
+
+                    if chat.content == "ㅎㅇ":
+                        service.post_chat(event.chat_event.room_index,
+                                          "ㅎㅇㅎㅇ")
+    time.sleep(service.config['lp_idle_time'])
