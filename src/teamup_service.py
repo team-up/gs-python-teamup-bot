@@ -24,6 +24,22 @@ class Chat:
                                                                                    self.chat_type, self.content)
 
 
+class ChatEvent:
+    def __init__(self, json):
+        self.team_index = json.get('team')
+        self.room_index = json.get('room')
+        self.user_index = json.get('user')
+        self.msg_index = json.get('msg')
+        self.room_name = json.get('name')
+
+
+class Event:
+    def __init__(self, response_json):
+        self.type = response_json['type']
+        if response_json['chat']:
+            self.chat_event = ChatEvent(response_json['chat'])
+
+
 class TeamUpService:
     def __init__(self):
         self.client = None
@@ -53,7 +69,7 @@ class TeamUpService:
         )
 
         self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
-                               username=username, password=password, client_id=client_id, client_secret=client_secret)
+                                username=username, password=password, client_id=client_id, client_secret=client_secret)
 
     def get_event_config(self):
         response = requests.get(event_host + '/')
@@ -67,9 +83,10 @@ class TeamUpService:
         print(response.status_code)
         print(response.json())
 
-        events = response.json()['events']
-        print(events)
-        return events
+        if response.json()['events']:
+            return [Event(event_json) for event_json in response.json()['events']]
+        else:
+            return []
 
     def get_chat_summary(self, room_index, chat_index):
         response = self.client.get(
