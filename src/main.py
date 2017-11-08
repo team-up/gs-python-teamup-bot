@@ -1,10 +1,18 @@
-import threading
+import json
+
+import os
+
 from teamup_service import TeamUpService
 
 import time
 
 service = TeamUpService()
-service.login()
+
+file_name = os.path.join(os.path.dirname(__file__), 'authentication.json')
+with open(file_name) as data_file:
+    authentication = json.load(data_file)
+
+service.login(authentication)
 
 while True:
     events = service.get_events()

@@ -6,12 +6,6 @@ event_host = 'https://test-ev.tmup.com'
 auth_host = 'https://test-auth.tmup.com'
 edge_host = 'https://test-edge.tmup.com'
 
-client_id = 'c'
-client_secret = 's'
-username = ''
-password = ''
-
-
 class Chat:
     def __init__(self, chat_index, response_json):
         self.index = chat_index
@@ -42,15 +36,23 @@ class Event:
 
 class TeamUpService:
     def __init__(self):
+        self.auth = None
         self.client = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
 
-    def login(self):
+    def login(self, auth):
         # TODO 실패 처리
         self.config = self.get_event_config()
+
+        # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
+        self.auth = auth
+        client_id = auth['client_id']
+        client_secret = auth['client_secret']
+        username = auth['username']
+        password = auth['password']
 
         extra = {
             'client_id': client_id,
