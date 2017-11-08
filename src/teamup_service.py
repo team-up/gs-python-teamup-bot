@@ -1,3 +1,5 @@
+from oauthlib.oauth2 import LegacyApplicationClient
+from requests_oauthlib import OAuth2Session
 import requests
 
 event_host = 'https://test-ev.tmup.com'
@@ -24,34 +26,34 @@ class Chat:
 
 class TeamUpService:
     def __init__(self):
-        self.token = None
-        self.headers = None
+        self.client = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
 
     def login(self):
-        response = requests.post(
-            url=auth_host + '/oauth2/token',
-            data={
-                'grant_type': 'password',
-                'client_id': client_id,
-                'client_secret': client_secret,
-                'username': username,
-                'password': password
-            }
+        # TODO 실패 처리
+        self.config = self.get_event_config()
+
+        extra = {
+            'client_id': client_id,
+            'client_secret': client_secret
+        }
+
+        def token_saver(token):
+            self.client.token = token
+
+        # TODO refresh Token 잘 동작하는지 확인 필요
+        self.client = OAuth2Session(
+            client=LegacyApplicationClient(client_id=client_id),
+            auto_refresh_url='https://auth.tmup.com/oauth2/token',
+            auto_refresh_kwargs=extra,
+            token_updater=token_saver
         )
 
-        print(response.status_code)
-        print(response.json())
-
-        # TODO 실패 처리
-
-        self.token = response.json()['access_token']
-        self.headers = {'authorization': 'bearer ' + self.token}
-
-        self.config = self.get_event_config()
+        self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
+                               username=username, password=password, client_id=client_id, client_secret=client_secret)
 
     def get_event_config(self):
         response = requests.get(event_host + '/')
@@ -60,18 +62,18 @@ class TeamUpService:
             return response.json()
 
     def get_events(self):
-        response = requests.get(event_host + '/v3/events', headers=self.headers)
+        response = self.client.get(event_host + '/v3/events')
 
         print(response.status_code)
         print(response.json())
 
         events = response.json()['events']
         print(events)
+        return events
 
     def get_chat_summary(self, room_index, chat_index):
-        response = requests.get(
-            edge_host + '/v3/message/summary/{}/{}/1'.format(room_index, chat_index),  # 1 은 confirm
-            headers=self.headers
+        response = self.client.get(
+            edge_host + '/v3/message/summary/{}/{}/1'.format(room_index, chat_index)  # 1 은 confirm
         )
 
         if response.status_code == 200:
@@ -79,19 +81,14 @@ class TeamUpService:
             return Chat(chat_index, response.json())
 
     def post_chat(self, room_index, content):
-        chat_header = dict(self.headers)
-        chat_header['Content-Type'] = 'application/json; charset=utf-8'
-        print(chat_header)
-        print(edge_host + '/v3/message/{}/{}'.format(room_index, 1))
-        response = requests.post(
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+        response = self.client.post(
             edge_host + '/v3/message/{}/{}'.format(room_index, 1),  # 1 은 타입
-            headers=chat_header,
-            json={'content': content}  # extras 추가해줘야함
+            headers=headers,
+            json={'content': content}  # TODO extras 추가해줘야함
         )
 
         print(response.status_code)
         print(response.json())
-
-
-service = TeamUpService()
-service.login()
