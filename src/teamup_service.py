@@ -114,3 +114,19 @@ class TeamUpService:
 
         print(response.status_code)
         print(response.json())
+
+# 403 나오면 확인하는 용도로 사용
+    def am_i_bot(self, team_index):
+        my_info_response = self.client.get(
+            auth_host + '/v1/user',
+            timeout=self.config['lp_wait_timeout']
+        )
+        user_index = my_info_response.json()['index']
+
+        response = self.client.get(
+            auth_host + '/v1/user/{}/team/{}'.format(user_index, team_index),
+            timeout=self.config['lp_wait_timeout']
+        )
+
+        return response.json()['is_bot']
+
