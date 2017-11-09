@@ -71,16 +71,17 @@ class TeamUpService:
         )
 
         self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
+                                timeout=self.config['lp_wait_timeout'],
                                 username=username, password=password, client_id=client_id, client_secret=client_secret)
 
     def get_event_config(self):
-        response = requests.get(event_host + '/')
+        response = requests.get(event_host + '/', timeout=self.config['lp_wait_timeout'])
 
         if response.status_code == 200:
             return response.json()
 
     def get_events(self):
-        response = self.client.get(event_host + '/v3/events')
+        response = self.client.get(event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
 
         print(response.status_code)
         print(response.json())
@@ -92,7 +93,8 @@ class TeamUpService:
 
     def get_chat_summary(self, room_index, chat_index):
         response = self.client.get(
-            edge_host + '/v3/message/summary/{}/{}/1'.format(room_index, chat_index)  # 1 은 confirm
+            edge_host + '/v3/message/summary/{}/{}/1'.format(room_index, chat_index),  # 1 은 confirm
+            timeout=self.config['lp_wait_timeout']
         )
 
         if response.status_code == 200:
@@ -106,7 +108,8 @@ class TeamUpService:
         response = self.client.post(
             edge_host + '/v3/message/{}/{}'.format(room_index, 1),  # 1 은 타입
             headers=headers,
-            json={'content': content}  # TODO extras 추가해줘야함
+            json={'content': content},  # TODO extras 추가해줘야함
+            timeout=self.config['lp_wait_timeout']
         )
 
         print(response.status_code)
