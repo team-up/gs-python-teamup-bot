@@ -1,4 +1,4 @@
-from oauthlib.oauth2 import LegacyApplicationClient
+from oauthlib.oauth2 import LegacyApplicationClient, MissingTokenError
 from requests_oauthlib import OAuth2Session
 import requests
 
@@ -70,9 +70,13 @@ class TeamUpService:
             token_updater=token_saver
         )
 
-        self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
-                                timeout=self.config['lp_wait_timeout'],
-                                username=username, password=password, client_id=client_id, client_secret=client_secret)
+        try:
+            self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
+                                    timeout=self.config['lp_wait_timeout'],
+                                    username=username, password=password, client_id=client_id, client_secret=client_secret)
+        except MissingTokenError:
+            print("로그인에 실패했습니다.")
+            raise
 
     def get_event_config(self):
         response = requests.get(event_host + '/', timeout=self.config['lp_wait_timeout'])
@@ -82,9 +86,6 @@ class TeamUpService:
 
     def get_events(self):
         response = self.client.get(event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
-
-        print(response.status_code)
-        print(response.json())
 
         if response.json()['events']:
             return [Event(event_json) for event_json in response.json()['events']]
@@ -98,7 +99,6 @@ class TeamUpService:
         )
 
         if response.status_code == 200:
-            print(response.json())
             return Chat(chat_index, response.json())
 
     def post_chat(self, room_index, content):
@@ -111,9 +111,6 @@ class TeamUpService:
             json={'content': content},  # TODO extras 추가해줘야함
             timeout=self.config['lp_wait_timeout']
         )
-
-        print(response.status_code)
-        print(response.json())
 
 # 403 나오면 확인하는 용도로 사용
     def am_i_bot(self, team_index):
