@@ -43,16 +43,17 @@ class TeamUpService:
             'lp_wait_timeout': 30
         }
 
-    def login(self, auth):
+    def login(self, configuration):
         # TODO 실패 처리
         self.config = self.get_event_config()
 
         # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
-        self.auth = auth
-        client_id = auth['client_id']
-        client_secret = auth['client_secret']
-        username = auth['username']
-        password = auth['password']
+        self.auth = configuration
+        self.button_bot = configuration['button_bot']
+        client_id = configuration['client_id']
+        client_secret = configuration['client_secret']
+        username = configuration['username']
+        password = configuration['password']
 
         extra = {
             'client_id': client_id,

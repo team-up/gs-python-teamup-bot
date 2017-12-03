@@ -9,11 +9,11 @@ import time
 
 service = TeamUpService()
 
-file_name = os.path.join(os.path.dirname(__file__), 'authentication.json')
+file_name = os.path.join(os.path.dirname(__file__), 'configuration.json')
 with open(file_name) as data_file:
-    authentication = json.load(data_file)
+    configuration = json.load(data_file)
 
-service.login(authentication)
+service.login(configuration)
 
 test_extras = [
     {
