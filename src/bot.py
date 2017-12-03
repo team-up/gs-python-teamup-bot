@@ -1,7 +1,7 @@
 import threading
 import time
 
-from event import ChatEvent, UserDropEvent, UserPasswordChangedEvent
+from event import ChatMessageEvent, UserDropEvent, UserPasswordChangedEvent
 
 
 class BaseBot:
@@ -12,7 +12,7 @@ class BaseBot:
     # callback 패턴으로 바꾸는 것 고려
     def handle_event(self, events):
         for event in events:
-            if isinstance(event, ChatEvent):
+            if isinstance(event, ChatMessageEvent):
                 chat = self.service.get_chat_summary(event.room_index,
                                                      event.msg_index)
 

@@ -3,15 +3,15 @@ class EventFactory:
     @staticmethod
     def create(response_json):
         event_type = response_json['type']
-        if event_type.startswith('chat'):
-            return ChatEvent(response_json['chat'])
+        if event_type == 'chat.message':
+            return ChatMessageEvent(response_json['chat'])
         elif event_type == 'user.drop':
             return UserDropEvent(response_json['user'])
         elif event_type == 'user.password':
             return UserPasswordChangedEvent(response_json['user'])
 
 
-class ChatEvent:
+class ChatMessageEvent:
     def __init__(self, json):
         self.team_index = json.get('team')
         self.room_index = json.get('room')
