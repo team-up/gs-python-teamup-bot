@@ -38,8 +38,8 @@ class BaseBot:
 class TextBot(BaseBot):
 
     def handle_chat(self, room_index, chat):
-        if chat and chat.content == "ㅎㅇ":
-            self.service.post_chat(room_index, "ㅎㅇㅎㅇ")
+        if chat and chat.content == "Hello":
+            self.service.post_chat(room_index, "World")
 
 
 class ButtonBot(BaseBot):
@@ -58,5 +58,5 @@ class ButtonBot(BaseBot):
         ]
 
     def handle_chat(self, room_index, chat):
-        if chat and chat.content == "ㅎㅇ":
-            self.service.post_chat(room_index, "ㅎㅇㅎㅇ", self.test_extras)
+        if chat and chat.content == "Hello":
+            self.service.post_chat(room_index, "World", self.test_extras)
