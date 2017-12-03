@@ -36,12 +36,14 @@ class Event:
 
 class TeamUpService:
     def __init__(self):
+        #TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = None
         self.client = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
+        self.button_bot = False
 
     def login(self, configuration):
         # TODO 실패 처리
@@ -87,6 +89,7 @@ class TeamUpService:
 
     def get_events(self):
         response = self.client.get(url=event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
+        print(response)
 
         if response.json()['events']:
             return [Event(event_json) for event_json in response.json()['events']]
@@ -110,10 +113,10 @@ class TeamUpService:
         if extras:
             json = {'content': content, 'extras': extras}
         else:
-            json = {'content:': content}
+            json = {'content': content}
 
         response = self.client.post(
-            edge_host + '/v3/message/{}/{}'.format(room_index, 1),  # 1 은 타입
+            edge_host + '/v3/message/{}/{}'.format(room_index, 1),  # 1은 일반, 2는 파일
             headers=headers,
             json=json,
             timeout=self.config['lp_wait_timeout']
