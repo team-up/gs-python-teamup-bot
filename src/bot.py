@@ -37,7 +37,7 @@ class TextBot(BaseBot):
 class ButtonBot(BaseBot):
 
     def __init__(self, service):
-        super(BaseBot).__init__(service)
+        super(ButtonBot, self).__init__(service)
         self.test_extras = [
             {
                 'version': 1,
