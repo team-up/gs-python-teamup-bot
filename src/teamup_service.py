@@ -43,7 +43,6 @@ class TeamUpService:
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
-        self.button_bot = False
 
     def login(self, configuration):
         # TODO 실패 처리
@@ -51,7 +50,6 @@ class TeamUpService:
 
         # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
         self.auth = configuration
-        self.button_bot = configuration['button_bot']
         client_id = configuration['client_id']
         client_secret = configuration['client_secret']
         username = configuration['username']

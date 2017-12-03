@@ -2,7 +2,7 @@ import json
 
 import os
 
-from bot import TextBot
+from bot import TextBot, ButtonBot
 from teamup_service import TeamUpService
 
 
@@ -14,6 +14,9 @@ with open(file_name) as data_file:
 
 service.login(configuration)
 
-bot = TextBot(service)
+if configuration['button_bot']:
+    bot = ButtonBot(service)
+else:
+    bot = TextBot(service)
 bot.run()
 
