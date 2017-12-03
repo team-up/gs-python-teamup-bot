@@ -15,6 +15,17 @@ with open(file_name) as data_file:
 
 service.login(authentication)
 
+test_extras = [
+    {
+        'version': 1,
+        'type': 'answer',
+        'msg_buttons': [
+            {"type": "text", "text": "텍스트 버튼"},
+            {"type": "url", "text": "구글", "url": "https://www.google.com"}
+        ]
+    }
+]
+
 # thread-safe 하다고 나와있긴 하지만 보장이 되는지 고민해 봐야함
 # callback 패턴으로 바꾸는 것 고려
 def handle_event(events):
@@ -23,8 +34,10 @@ def handle_event(events):
             chat = service.get_chat_summary(event.chat_event.room_index,
                                             event.chat_event.msg_index)
 
+
             if chat and chat.content == "ㅎㅇ":
-                service.post_chat(event.chat_event.room_index, "ㅎㅇㅎㅇ")
+                # service.post_chat(event.chat_event.room_index, "ㅎㅇㅎㅇ")
+                service.post_chat(event.chat_event.room_index, "ㅎㅇㅎㅇ", test_extras)
 
 while True:
     events = service.get_events()

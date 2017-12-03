@@ -85,7 +85,7 @@ class TeamUpService:
             return response.json()
 
     def get_events(self):
-        response = self.client.get(event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
+        response = self.client.get(url=event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
 
         if response.json()['events']:
             return [Event(event_json) for event_json in response.json()['events']]
@@ -101,14 +101,20 @@ class TeamUpService:
         if response.status_code == 200:
             return Chat(chat_index, response.json())
 
-    def post_chat(self, room_index, content):
+    def post_chat(self, room_index, content, extras=None):
         headers = {
             'Content-Type': 'application/json; charset=utf-8'
         }
+
+        if extras:
+            json = {'content': content, 'extras': extras}
+        else:
+            json = {'content:': content}
+
         response = self.client.post(
             edge_host + '/v3/message/{}/{}'.format(room_index, 1),  # 1 은 타입
             headers=headers,
-            json={'content': content},  # TODO extras 추가해줘야함
+            json=json,
             timeout=self.config['lp_wait_timeout']
         )
 
