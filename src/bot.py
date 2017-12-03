@@ -1,7 +1,7 @@
 import threading
 import time
 
-from event import ChatEvent
+from event import ChatEvent, UserDropEvent, UserPasswordChangedEvent
 
 
 class BaseBot:
@@ -17,6 +17,12 @@ class BaseBot:
                                                      event.msg_index)
 
                 self.handle_chat(event.room_index, chat)
+
+            # TODO 나인지 확인해줘야 할듯.
+            elif isinstance(event, UserDropEvent):
+                raise RuntimeError("봇 계정이 탈퇴되었습니다.")
+            elif isinstance(event, UserPasswordChangedEvent):
+                raise RuntimeError("봇 계정의 비밀번호가 바뀌었습니다.")
 
     def run(self):
         while True:

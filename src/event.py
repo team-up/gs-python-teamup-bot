@@ -5,6 +5,10 @@ class EventFactory:
         event_type = response_json['type']
         if event_type.startswith('chat'):
             return ChatEvent(response_json['chat'])
+        elif event_type == 'user.drop':
+            return UserDropEvent(response_json['user'])
+        elif event_type == 'user.password':
+            return UserPasswordChangedEvent(response_json['user'])
 
 
 class ChatEvent:
@@ -14,3 +18,16 @@ class ChatEvent:
         self.user_index = json.get('user')
         self.msg_index = json.get('msg')
         self.room_name = json.get('name')
+
+
+class UserEvent:
+    def __init__(self, json):
+        self.user_index = json.get('user')
+
+
+class UserDropEvent(UserEvent):
+    pass
+
+
+class UserPasswordChangedEvent(UserEvent):
+    pass
