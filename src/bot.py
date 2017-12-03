@@ -1,6 +1,8 @@
 import threading
 import time
 
+from event import ChatEvent
+
 
 class BaseBot:
     def __init__(self, service):
@@ -10,11 +12,11 @@ class BaseBot:
     # callback 패턴으로 바꾸는 것 고려
     def handle_event(self, events):
         for event in events:
-            if event.chat_event:
-                chat = self.service.get_chat_summary(event.chat_event.room_index,
-                                                     event.chat_event.msg_index)
+            if isinstance(event, ChatEvent):
+                chat = self.service.get_chat_summary(event.room_index,
+                                                     event.msg_index)
 
-                self.handle_chat(event.chat_event.room_index, chat)
+                self.handle_chat(event.room_index, chat)
 
     def run(self):
         while True:

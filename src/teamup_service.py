@@ -2,9 +2,12 @@ from oauthlib.oauth2 import LegacyApplicationClient, MissingTokenError
 from requests_oauthlib import OAuth2Session
 import requests
 
+from event import EventFactory
+
 event_host = 'https://test-ev.tmup.com'
 auth_host = 'https://test-auth.tmup.com'
 edge_host = 'https://test-edge.tmup.com'
+
 
 class Chat:
     def __init__(self, chat_index, response_json):
@@ -18,25 +21,9 @@ class Chat:
                                                                                    self.chat_type, self.content)
 
 
-class ChatEvent:
-    def __init__(self, json):
-        self.team_index = json.get('team')
-        self.room_index = json.get('room')
-        self.user_index = json.get('user')
-        self.msg_index = json.get('msg')
-        self.room_name = json.get('name')
-
-
-class Event:
-    def __init__(self, response_json):
-        self.type = response_json['type']
-        if response_json['chat']:
-            self.chat_event = ChatEvent(response_json['chat'])
-
-
 class TeamUpService:
     def __init__(self):
-        #TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
+        # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = None
         self.client = None
         self.config = {
@@ -74,7 +61,8 @@ class TeamUpService:
         try:
             self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
                                     timeout=self.config['lp_wait_timeout'],
-                                    username=username, password=password, client_id=client_id, client_secret=client_secret)
+                                    username=username, password=password, client_id=client_id,
+                                    client_secret=client_secret)
         except MissingTokenError:
             print("로그인에 실패했습니다.")
             raise
@@ -90,7 +78,7 @@ class TeamUpService:
         print(response)
 
         if response.json()['events']:
-            return [Event(event_json) for event_json in response.json()['events']]
+            return [EventFactory.create(event_json) for event_json in response.json()['events']]
         else:
             return []
 
@@ -120,7 +108,7 @@ class TeamUpService:
             timeout=self.config['lp_wait_timeout']
         )
 
-# 403 나오면 확인하는 용도로 사용
+    # 403 나오면 확인하는 용도로 사용
     def am_i_bot(self, team_index):
         my_info_response = self.client.get(
             auth_host + '/v1/user',
@@ -134,4 +122,3 @@ class TeamUpService:
         )
 
         return response.json()['is_bot']
-
