@@ -37,10 +37,8 @@ class TeamUpService:
 
         # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
         self.auth = configuration
-        client_id = configuration['client_id']
-        client_secret = configuration['client_secret']
-        username = configuration['username']
-        password = configuration['password']
+        client_id = self.auth['client_id']
+        client_secret = self.auth['client_secret']
 
         extra = {
             'client_id': client_id,
@@ -57,6 +55,22 @@ class TeamUpService:
             auto_refresh_kwargs=extra,
             token_updater=token_saver
         )
+
+        # TODO 잘 동작하는지 확인해 봐야함.. 라이브러리 드러낼까 ㅜㅜ
+        def refresh_fail(response):
+            if response.status_code == 403:
+                self.login_with_password()
+
+        self.client.register_compliance_hook("refresh_token_response", refresh_fail)
+
+        self.login_with_password()
+
+
+    def login_with_password(self):
+        client_id = self.auth['client_id']
+        client_secret = self.auth['client_secret']
+        username = self.auth['username']
+        password = self.auth['password']
 
         try:
             self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
