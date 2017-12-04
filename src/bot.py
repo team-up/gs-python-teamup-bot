@@ -7,6 +7,7 @@ from event import ChatMessageEvent, UserDropEvent, UserPasswordChangedEvent
 class BaseBot:
     def __init__(self, service):
         self.service = service
+        self.error_count = 0
 
     # thread-safe 하다고 나와있긴 하지만 보장이 되는지 고민해 봐야함
     # callback 패턴으로 바꾸는 것 고려
@@ -26,10 +27,22 @@ class BaseBot:
 
     def run(self):
         while True:
-            events = self.service.get_events()
-            if events:
-                threading.Thread(target=self.handle_event, args=(events,)).start()
-            time.sleep(self.service.config['lp_idle_time'])
+            try:
+                events = self.service.get_events()
+                if events:
+                    threading.Thread(target=self.handle_event, args=(events,)).start()
+                time.sleep(self.service.config['lp_idle_time'])
+            except Exception as e:
+                # TODO status code 를 확인하고 이 로직을 타야할지?
+                print(e)
+                self.error_count += 1
+                if self.error_count > 3:
+                    print("오류가 발생했습니다. 프로그램을 종료합니다.")
+                    return
+                else:
+                    print("오류가 발생했습니다.")
+                    time.sleep(5)
+
 
     def handle_chat(self, team_index, room_index, chat):
         raise NotImplementedError()
