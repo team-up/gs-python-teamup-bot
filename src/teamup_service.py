@@ -105,7 +105,7 @@ class TeamUpService:
         if response.status_code == 200:
             return Chat(chat_index, response.json())
 
-    def post_chat(self, room_index, content, extras=None):
+    def post_chat(self, team_index, room_index, content, extras=None):
         headers = {
             'Content-Type': 'application/json; charset=utf-8'
         }
@@ -121,6 +121,10 @@ class TeamUpService:
             json=json,
             timeout=self.config['lp_wait_timeout']
         )
+
+        if response.status_code == 403:
+            if not self.am_i_bot(team_index):
+                raise RuntimeError("봇으로 등록되어 있지 않습니다.")
 
     # 403 나오면 확인하는 용도로 사용
     def am_i_bot(self, team_index):

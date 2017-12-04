@@ -16,7 +16,7 @@ class BaseBot:
                 chat = self.service.get_chat_summary(event.room_index,
                                                      event.msg_index)
 
-                self.handle_chat(event.room_index, chat)
+                self.handle_chat(event.team_index, event.room_index, chat)
 
             # TODO 나인지 확인해줘야 할듯.
             elif isinstance(event, UserDropEvent):
@@ -31,15 +31,15 @@ class BaseBot:
                 threading.Thread(target=self.handle_event, args=(events,)).start()
             time.sleep(self.service.config['lp_idle_time'])
 
-    def handle_chat(self, room_index, chat):
+    def handle_chat(self, team_index, room_index, chat):
         raise NotImplementedError()
 
 
 class TextBot(BaseBot):
 
-    def handle_chat(self, room_index, chat):
+    def handle_chat(self, team_index, room_index, chat):
         if chat and chat.content == "Hello":
-            self.service.post_chat(room_index, "World")
+            self.service.post_chat(team_index, room_index, "World")
 
 
 class ButtonBot(BaseBot):
@@ -57,6 +57,6 @@ class ButtonBot(BaseBot):
             }
         ]
 
-    def handle_chat(self, room_index, chat):
+    def handle_chat(self, team_index, room_index, chat):
         if chat and chat.content == "Hello":
-            self.service.post_chat(room_index, "World", self.test_extras)
+            self.service.post_chat(team_index, room_index, "World", self.test_extras)
