@@ -16,6 +16,7 @@ class BaseBot:
     def handle_event(self, events):
         for event in events:
             if isinstance(event, ChatMessageEvent):
+                # TODO 에러 처리
                 chat = self.service.get_chat_summary(event.room_index,
                                                      event.msg_index)
 
@@ -47,20 +48,17 @@ class BaseBot:
                     print("오류가 발생했습니다.")
                     time.sleep(5)
 
-
     def handle_chat(self, team_index, room_index, chat):
         raise NotImplementedError()
 
 
 class TextBot(BaseBot):
-
     def handle_chat(self, team_index, room_index, chat):
         if chat and chat.content == "Hello":
             self.service.post_chat(team_index, room_index, "World")
 
 
 class ButtonBot(BaseBot):
-
     def __init__(self, service):
         super(ButtonBot, self).__init__(service)
         self.test_extras = [

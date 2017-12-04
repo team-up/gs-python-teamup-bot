@@ -66,7 +66,6 @@ class TeamUpService:
 
         self.login_with_password()
 
-
     def login_with_password(self):
         client_id = self.auth['client_id']
         client_secret = self.auth['client_secret']
