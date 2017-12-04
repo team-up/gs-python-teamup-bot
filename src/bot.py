@@ -1,6 +1,8 @@
 import threading
 import time
 
+import sys
+
 from event import ChatMessageEvent, UserDropEvent, UserPasswordChangedEvent
 
 
@@ -21,9 +23,11 @@ class BaseBot:
 
             # TODO 나인지 확인해줘야 할듯.
             elif isinstance(event, UserDropEvent):
-                raise RuntimeError("봇 계정이 탈퇴되었습니다.")
+                print("봇 계정이 탈퇴되었습니다.")
+                sys.exit()
             elif isinstance(event, UserPasswordChangedEvent):
-                raise RuntimeError("봇 계정의 비밀번호가 바뀌었습니다.")
+                print("봇 계정의 비밀번호가 바뀌었습니다.")
+                sys.exit()
 
     def run(self):
         while True:
@@ -38,7 +42,7 @@ class BaseBot:
                 self.error_count += 1
                 if self.error_count > 3:
                     print("오류가 발생했습니다. 프로그램을 종료합니다.")
-                    return
+                    sys.exit()
                 else:
                     print("오류가 발생했습니다.")
                     time.sleep(5)

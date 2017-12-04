@@ -1,3 +1,4 @@
+import sys
 from oauthlib.oauth2 import LegacyApplicationClient, MissingTokenError
 from requests_oauthlib import OAuth2Session
 import requests
@@ -124,7 +125,8 @@ class TeamUpService:
 
         if response.status_code == 403:
             if not self.am_i_bot(team_index):
-                raise RuntimeError("봇으로 등록되어 있지 않습니다.")
+                print("봇으로 등록되어 있지 않습니다.")
+                sys.exit()
 
     # 403 나오면 확인하는 용도로 사용
     def am_i_bot(self, team_index):
