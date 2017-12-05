@@ -48,6 +48,8 @@ class TeamUpService:
 
         def token_saver(token):
             self.client.token = token
+            print("token_saver invoked")
+            print("token : {}".format(self.client.token))
 
         # TODO refresh Token 잘 동작하는지 확인 필요
         self.client = OAuth2Session(
@@ -59,12 +61,15 @@ class TeamUpService:
 
         # TODO 잘 동작하는지 확인해 봐야함.. 라이브러리 드러낼까 ㅜㅜ
         def refresh_fail(response):
+            print("refresh invoked: {}".format(response.status_code))
             if response.status_code == 403:
                 self.login_with_password()
 
         self.client.register_compliance_hook("refresh_token_response", refresh_fail)
 
         self.login_with_password()
+
+        print("token : {}".format(self.client.token))
 
     def login_with_password(self):
         client_id = self.auth['client_id']
