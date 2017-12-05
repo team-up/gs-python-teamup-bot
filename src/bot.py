@@ -25,11 +25,12 @@ class BaseBot:
                 if chat:
                     self.handle_chat(event.team_index, event.room_index, chat)
 
-            # TODO 나인지 확인해줘야 할듯.
-            elif isinstance(event, UserDropEvent):
+            elif isinstance(event, UserDropEvent)\
+                    and self.service.my_index == event.user_index:
                 logger.error("봇 계정이 탈퇴되었습니다.")
                 sys.exit()
-            elif isinstance(event, UserPasswordChangedEvent):
+            elif isinstance(event, UserPasswordChangedEvent)\
+                    and self.service.my_index == event.user_index:
                 logger.error("봇 계정의 비밀번호가 바뀌었습니다.")
                 sys.exit()
 
