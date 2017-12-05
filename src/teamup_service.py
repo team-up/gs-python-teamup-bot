@@ -25,6 +25,7 @@ class TeamUpService:
         # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = configuration
         self.client = None
+        self.token = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
@@ -34,7 +35,7 @@ class TeamUpService:
         # TODO 실패 처리
         # TODO add hooks
         self.config = self.get_event_config()
-        self.login_with_password()
+        self.client = self.login_with_password()
 
     def login_with_password(self):
         client_id = self.auth['client_id']
@@ -58,10 +59,27 @@ class TeamUpService:
                       headers=headers,
                       data=auth_dict)
 
-        result = response.json()
+        self.token = response.json()
         session = requests.session()
-        session.headers = {'Authorization': "{} {}".format(result['token_type'], result['access_token'])}
-        self.client = session
+        session.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
+        return session
+
+    def refresh_token(self):
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+        }
+
+        auth_dict = {
+            'grant_type': 'refresh_token',
+            'refresh_token': self.token['refresh_token'],
+        }
+
+        response = requests.post(url=auth_host + "/oauth2/token",
+                                 headers=headers,
+                                 data=auth_dict)
+
+        self.token = response.json()
+        self.client.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
 
     def get_event_config(self):
         response = requests.get(event_host + '/', timeout=self.config['lp_wait_timeout'])
