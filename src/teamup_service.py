@@ -4,9 +4,9 @@ import requests
 
 from event import EventFactory
 
-event_host = 'https://test-ev.tmup.com'
-auth_host = 'https://test-auth.tmup.com'
-edge_host = 'https://test-edge.tmup.com'
+event_host = 'https://dev-ev.tmup.com'
+auth_host = 'https://dev-auth.tmup.com'
+edge_host = 'https://dev-edge.tmup.com'
 
 logger = logging.getLogger("teamup-bot")
 
@@ -25,7 +25,6 @@ class Chat:
 
 class TeamUpService:
     def __init__(self, configuration):
-        # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = configuration
         self.token = None
         self.config = {
@@ -41,12 +40,16 @@ class TeamUpService:
             logger.debug("Response text : {}".format(response.text))
             if response.status_code == 401:
                 token = self.refresh_token()
-                if not token:
+                if token:
+                    logger.debug("token refreshed : {}".format(token))
+                else:
+                    logger.debug("refresh token failed. trying pwd credential : {}".format(token))
                     token = self.login_with_password()
 
                 if token:
                     self.set_authorize_header(token)
                     req = response.request
+                    req.headers = {'Authorization': "{} {}".format(token['token_type'], token['access_token'])}
                     return self.client.send(req) # 재시도
                 else:
                     logging.error("로그인에 실패했습니다.")
@@ -83,8 +86,12 @@ class TeamUpService:
                                  headers=headers,
                                  data=auth_dict)
 
+        logger.debug(response.json())
+
         if response.status_code == 200:
-            return response.json()
+            result = response.json()
+            if 'error' not in result and 'access_token' in result:
+                return result
         else:
             logging.error("로그인에 실패했습니다.")
             sys.exit()
@@ -104,7 +111,9 @@ class TeamUpService:
                                  data=auth_dict)
 
         if response.status_code == 200:
-            return response.json()
+            result = response.json()
+            if 'error' not in result and 'access_token' in result:
+                return result
 
     def set_authorize_header(self, token):
         self.token = token
