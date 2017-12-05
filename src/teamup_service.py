@@ -51,16 +51,14 @@ class TeamUpService:
                     self.set_authorize_header(token)
                     req = response.request
                     req.headers = {'Authorization': "{} {}".format(token['token_type'], token['access_token'])}
-                    return self.client.send(req) # 재시도
+                    return self.client.send(req)  # 재시도
                 else:
                     logging.error("로그인에 실패했습니다.")
                     sys.exit()
 
-
         self.client.hooks['response'].append(response_hook)
 
     def login(self):
-        # TODO 실패 처리
         self.config = self.get_event_config()
         token = self.login_with_password()
         self.set_authorize_header(token)

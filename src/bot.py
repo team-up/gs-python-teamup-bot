@@ -9,6 +9,7 @@ from thread_pool import ThreadPool
 
 logger = logging.getLogger("teamup-bot")
 
+
 class BaseBot:
     def __init__(self, service):
         self.service = service
@@ -25,11 +26,11 @@ class BaseBot:
                 if chat:
                     self.handle_chat(event.team_index, event.room_index, chat)
 
-            elif isinstance(event, UserDropEvent)\
+            elif isinstance(event, UserDropEvent) \
                     and self.service.my_index == event.user_index:
                 logger.error("봇 계정이 탈퇴되었습니다.")
                 sys.exit()
-            elif isinstance(event, UserPasswordChangedEvent)\
+            elif isinstance(event, UserPasswordChangedEvent) \
                     and self.service.my_index == event.user_index:
                 logger.error("봇 계정의 비밀번호가 바뀌었습니다.")
                 sys.exit()
@@ -42,7 +43,6 @@ class BaseBot:
                     self.thread_pool.add_task(self.handle_event, events)
                 time.sleep(self.service.config['lp_idle_time'])
             except Exception as e:
-                # TODO status code 를 확인하고 이 로직을 타야할지?
                 self.error_count += 1
                 if self.error_count > 3:
                     logger.error("오류가 발생했습니다. 프로그램을 종료합니다.")
