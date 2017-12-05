@@ -5,9 +5,9 @@ import requests
 
 from event import EventFactory
 
-event_host = 'https://test-ev.tmup.com'
-auth_host = 'https://test-auth.tmup.com'
-edge_host = 'https://test-edge.tmup.com'
+event_host = 'https://dev-ev.tmup.com'
+auth_host = 'https://dev-auth.tmup.com'
+edge_host = 'https://dev-edge.tmup.com'
 
 
 class Chat:
@@ -52,7 +52,7 @@ class TeamUpService:
         # TODO refresh Token 잘 동작하는지 확인 필요
         self.client = OAuth2Session(
             client=LegacyApplicationClient(client_id=client_id),
-            auto_refresh_url='https://auth.tmup.com/oauth2/token',
+            auto_refresh_url=auth_host + '/oauth2/token',
             auto_refresh_kwargs=extra,
             token_updater=token_saver
         )
@@ -73,7 +73,7 @@ class TeamUpService:
         password = self.auth['password']
 
         try:
-            self.client.fetch_token(token_url='https://test-auth.tmup.com/oauth2/token',
+            self.client.fetch_token(token_url=auth_host + '/oauth2/token',
                                     timeout=self.config['lp_wait_timeout'],
                                     username=username, password=password, client_id=client_id,
                                     client_secret=client_secret)
