@@ -23,21 +23,21 @@ class Chat:
 
 
 class TeamUpService:
-    def __init__(self):
+    def __init__(self, configuration):
         # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
-        self.auth = None
+        self.auth = configuration
+        print(self.auth)
         self.client = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
 
-    def login(self, configuration):
+    def login(self):
         # TODO 실패 처리
         self.config = self.get_event_config()
 
         # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
-        self.auth = configuration
         client_id = self.auth['client_id']
         client_secret = self.auth['client_secret']
 
