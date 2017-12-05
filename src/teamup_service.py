@@ -73,10 +73,14 @@ class TeamUpService:
                       headers=headers,
                       data=auth_dict)
 
-        self.token = response.json()
-        session = requests.session()
-        session.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
-        return session
+        if response.status_code == 200:
+            self.token = response.json()
+            session = requests.session()
+            session.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
+            return session
+        else:
+            logging.error("로그인에 실패했습니다.")
+            sys.exit()
 
     def refresh_token(self):
         headers = {
