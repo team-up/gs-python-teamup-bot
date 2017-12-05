@@ -10,6 +10,7 @@ edge_host = 'https://test-edge.tmup.com'
 
 logger = logging.getLogger("teamup-bot")
 
+
 class Chat:
     def __init__(self, chat_index, response_json):
         self.index = chat_index
@@ -39,7 +40,8 @@ class TeamUpService:
             logger.debug("Response status code : {}".format(response.status_code))
             logger.debug("Response text : {}".format(response.text))
             if response.status_code == 401:
-                self.refresh_token()
+                token = self.refresh_token()
+                self.set_authorize_header(token)
                 # TODO if success
                 req = response.request
                 # retry
@@ -50,7 +52,8 @@ class TeamUpService:
     def login(self):
         # TODO 실패 처리
         self.config = self.get_event_config()
-        self.login_with_password()
+        token = self.login_with_password()
+        self.set_authorize_header(token)
 
     def login_with_password(self):
         client_id = self.auth['client_id']
@@ -71,12 +74,11 @@ class TeamUpService:
         }
 
         response = requests.post(url=auth_host + "/oauth2/token",
-                      headers=headers,
-                      data=auth_dict)
+                                 headers=headers,
+                                 data=auth_dict)
 
         if response.status_code == 200:
-            self.token = response.json()
-            self.client.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
+            return response.json()
         else:
             logging.error("로그인에 실패했습니다.")
             sys.exit()
@@ -95,8 +97,11 @@ class TeamUpService:
                                  headers=headers,
                                  data=auth_dict)
 
-        self.token = response.json()
-        self.client.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
+        return response.json()
+
+    def set_authorize_header(self, token):
+        self.token = token
+        self.client.headers = {'Authorization': "{} {}".format(token['token_type'], token['access_token'])}
 
     def get_event_config(self):
         response = requests.get(event_host + '/', timeout=self.config['lp_wait_timeout'])
