@@ -3,9 +3,9 @@ import requests
 
 from event import EventFactory
 
-event_host = 'https://dev-ev.tmup.com'
-auth_host = 'https://dev-auth.tmup.com'
-edge_host = 'https://dev-edge.tmup.com'
+event_host = 'https://test-ev.tmup.com'
+auth_host = 'https://test-auth.tmup.com'
+edge_host = 'https://test-edge.tmup.com'
 
 
 class Chat:
@@ -33,9 +33,21 @@ class TeamUpService:
 
     def login(self):
         # TODO 실패 처리
-        # TODO add hooks
         self.config = self.get_event_config()
         self.client = self.login_with_password()
+
+        def response_hook(response, *args, **kwargs):
+            print(response)
+            if response.json():
+                print(response.json())
+            if response.status_code == 401:
+                self.refresh_token()
+                # TODO if success
+                req = response.request
+                # retry
+                return self.client.send(req)
+
+        self.client.hooks['response'].append(response_hook)
 
     def login_with_password(self):
         client_id = self.auth['client_id']
