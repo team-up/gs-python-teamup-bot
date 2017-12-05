@@ -1,6 +1,4 @@
 import sys
-from oauthlib.oauth2 import LegacyApplicationClient, MissingTokenError
-from requests_oauthlib import OAuth2Session
 import requests
 
 from event import EventFactory
@@ -26,7 +24,6 @@ class TeamUpService:
     def __init__(self, configuration):
         # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = configuration
-        print(self.auth)
         self.client = None
         self.config = {
             'lp_idle_time': 1,
@@ -35,44 +32,9 @@ class TeamUpService:
 
     def login(self):
         # TODO 실패 처리
+        # TODO add hooks
         self.config = self.get_event_config()
-
-        # TODO 6개월 뒤엔 다시 아디, 비번으로 로그인 해야해서 일단 저장
-        client_id = self.auth['client_id']
-        client_secret = self.auth['client_secret']
-
-        extra = {
-            'client_id': client_id,
-            'client_secret': client_secret
-        }
-
-        def token_saver(token):
-            self.client.token = token
-            print("token_saver invoked")
-            print("token : {}".format(self.client.token))
-
-        # TODO refresh Token 잘 동작하는지 확인 필요
-        self.client = OAuth2Session(
-            client=LegacyApplicationClient(client_id=client_id),
-            auto_refresh_url=auth_host + '/oauth2/token',
-            auto_refresh_kwargs=extra,
-            token_updater=token_saver
-        )
-
-        # TODO 잘 동작하는지 확인해 봐야함.. 라이브러리 드러낼까 ㅜㅜ
-        def refresh_fail(response):
-            print("refresh invoked: {}".format(response.status_code))
-            if response.status_code == 401:
-                self.login_with_password()
-                return response
-            else:
-                return response
-
-        self.client.register_compliance_hook("refresh_token_response", refresh_fail)
-
         self.login_with_password()
-
-        print("token : {}".format(self.client.token))
 
     def login_with_password(self):
         client_id = self.auth['client_id']
@@ -80,14 +42,26 @@ class TeamUpService:
         username = self.auth['username']
         password = self.auth['password']
 
-        try:
-            self.client.fetch_token(token_url=auth_host + '/oauth2/token',
-                                    timeout=self.config['lp_wait_timeout'],
-                                    username=username, password=password, client_id=client_id,
-                                    client_secret=client_secret)
-        except MissingTokenError:
-            print("로그인에 실패했습니다.")
-            raise
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+        }
+
+        auth_dict = {
+            'grant_type': 'password',
+            'client_id': client_id,
+            'client_secret': client_secret,
+            'username': username,
+            'password': password
+        }
+
+        response = requests.post(url=auth_host + "/oauth2/token",
+                      headers=headers,
+                      data=auth_dict)
+
+        result = response.json()
+        session = requests.session()
+        session.headers = {'Authorization': "{} {}".format(result['token_type'], result['access_token'])}
+        self.client = session
 
     def get_event_config(self):
         response = requests.get(event_host + '/', timeout=self.config['lp_wait_timeout'])
