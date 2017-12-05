@@ -1,3 +1,4 @@
+import logging
 import sys
 import requests
 
@@ -7,6 +8,7 @@ event_host = 'https://test-ev.tmup.com'
 auth_host = 'https://test-auth.tmup.com'
 edge_host = 'https://test-edge.tmup.com'
 
+logger = logging.getLogger("teamup-bot")
 
 class Chat:
     def __init__(self, chat_index, response_json):
@@ -37,9 +39,9 @@ class TeamUpService:
         self.client = self.login_with_password()
 
         def response_hook(response, *args, **kwargs):
-            print(response)
-            if response.json():
-                print(response.json())
+            logger.debug("Request url : {}".format(response.request.url))
+            logger.debug("Response status code : {}".format(response.status_code))
+            logger.debug("Response text : {}".format(response.text))
             if response.status_code == 401:
                 self.refresh_token()
                 # TODO if success
@@ -101,8 +103,6 @@ class TeamUpService:
 
     def get_events(self):
         response = self.client.get(url=event_host + '/v3/events', timeout=self.config['lp_wait_timeout'])
-        print(response)
-
         if response.json()['events']:
             return [EventFactory.create(event_json) for event_json in response.json()['events']]
         else:
@@ -136,7 +136,7 @@ class TeamUpService:
 
         if response.status_code == 403:
             if not self.am_i_bot(team_index):
-                print("봇으로 등록되어 있지 않습니다.")
+                logger.error("봇으로 등록되어 있지 않습니다.")
                 sys.exit()
 
     # 403 나오면 확인하는 용도로 사용

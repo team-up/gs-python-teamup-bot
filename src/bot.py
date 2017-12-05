@@ -1,3 +1,4 @@
+import logging
 import threading
 import time
 
@@ -5,6 +6,7 @@ import sys
 
 from event import ChatMessageEvent, UserDropEvent, UserPasswordChangedEvent
 
+logger = logging.getLogger("teamup-bot")
 
 class BaseBot:
     def __init__(self, service):
@@ -24,10 +26,10 @@ class BaseBot:
 
             # TODO 나인지 확인해줘야 할듯.
             elif isinstance(event, UserDropEvent):
-                print("봇 계정이 탈퇴되었습니다.")
+                logger.error("봇 계정이 탈퇴되었습니다.")
                 sys.exit()
             elif isinstance(event, UserPasswordChangedEvent):
-                print("봇 계정의 비밀번호가 바뀌었습니다.")
+                logger.error("봇 계정의 비밀번호가 바뀌었습니다.")
                 sys.exit()
 
     def run(self):
@@ -39,13 +41,12 @@ class BaseBot:
                 time.sleep(self.service.config['lp_idle_time'])
             except Exception as e:
                 # TODO status code 를 확인하고 이 로직을 타야할지?
-                print(e)
                 self.error_count += 1
                 if self.error_count > 3:
-                    print("오류가 발생했습니다. 프로그램을 종료합니다.")
+                    logger.error("오류가 발생했습니다. 프로그램을 종료합니다.")
                     sys.exit()
                 else:
-                    print("오류가 발생했습니다.")
+                    logger.error("오류가 발생했습니다.")
                     time.sleep(5)
 
     def handle_chat(self, team_index, room_index, chat):
