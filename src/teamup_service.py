@@ -33,6 +33,7 @@ class TeamUpService:
         }
 
         self.client = requests.session()
+        self.my_index = None
 
         def response_hook(response, *args, **kwargs):
             logger.debug("Request url : {}".format(response.request.url))
@@ -63,6 +64,7 @@ class TeamUpService:
         self.config = self.get_event_config()
         token = self.login_with_password()
         self.set_authorize_header(token)
+        self.my_index = self.get_my_index()
 
     def login_with_password(self):
         client_id = self.auth['client_id']
@@ -163,16 +165,21 @@ class TeamUpService:
                 logger.error("봇으로 등록되어 있지 않습니다.")
                 sys.exit()
 
-    # 403 나오면 확인하는 용도로 사용
-    def am_i_bot(self, team_index):
+    def get_my_index(self):
         my_info_response = self.client.get(
             auth_host + '/v1/user',
             timeout=self.config['lp_wait_timeout']
         )
-        user_index = my_info_response.json()['index']
+        if my_info_response.status_code == 200:
+            return my_info_response.json()['index']
+        else:
+            logger.error("내 정보를 받아오는 데 실패했습니다.")
+            sys.exit()
 
+    # 403 나오면 확인하는 용도로 사용
+    def am_i_bot(self, team_index):
         response = self.client.get(
-            auth_host + '/v1/user/{}/team/{}'.format(user_index, team_index),
+            auth_host + '/v1/user/{}/team/{}'.format(self.my_index, team_index),
             timeout=self.config['lp_wait_timeout']
         )
 
