@@ -62,8 +62,11 @@ class TeamUpService:
         # TODO 잘 동작하는지 확인해 봐야함.. 라이브러리 드러낼까 ㅜㅜ
         def refresh_fail(response):
             print("refresh invoked: {}".format(response.status_code))
-            if response.status_code == 403:
+            if response.status_code == 401:
                 self.login_with_password()
+                return response
+            else:
+                return response
 
         self.client.register_compliance_hook("refresh_token_response", refresh_fail)
 
