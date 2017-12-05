@@ -20,11 +20,10 @@ class BaseBot:
     def handle_event(self, events):
         for event in events:
             if isinstance(event, ChatMessageEvent):
-                # TODO 에러 처리
                 chat = self.service.get_chat_summary(event.room_index,
                                                      event.msg_index)
-
-                self.handle_chat(event.team_index, event.room_index, chat)
+                if chat:
+                    self.handle_chat(event.team_index, event.room_index, chat)
 
             # TODO 나인지 확인해줘야 할듯.
             elif isinstance(event, UserDropEvent):
