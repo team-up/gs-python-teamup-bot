@@ -41,11 +41,17 @@ class TeamUpService:
             logger.debug("Response text : {}".format(response.text))
             if response.status_code == 401:
                 token = self.refresh_token()
-                self.set_authorize_header(token)
-                # TODO if success
-                req = response.request
-                # retry
-                return self.client.send(req)
+                if not token:
+                    token = self.login_with_password()
+
+                if token:
+                    self.set_authorize_header(token)
+                    req = response.request
+                    return self.client.send(req) # 재시도
+                else:
+                    logging.error("로그인에 실패했습니다.")
+                    sys.exit()
+
 
         self.client.hooks['response'].append(response_hook)
 
@@ -97,7 +103,8 @@ class TeamUpService:
                                  headers=headers,
                                  data=auth_dict)
 
-        return response.json()
+        if response.status_code == 200:
+            return response.json()
 
     def set_authorize_header(self, token):
         self.token = token
