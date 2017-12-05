@@ -26,17 +26,13 @@ class TeamUpService:
     def __init__(self, configuration):
         # TODO 각 필드별로 설명 써주면 좋을 듯 (이게 컨벤션인듯?)
         self.auth = configuration
-        self.client = None
         self.token = None
         self.config = {
             'lp_idle_time': 1,
             'lp_wait_timeout': 30
         }
 
-    def login(self):
-        # TODO 실패 처리
-        self.config = self.get_event_config()
-        self.client = self.login_with_password()
+        self.client = requests.session()
 
         def response_hook(response, *args, **kwargs):
             logger.debug("Request url : {}".format(response.request.url))
@@ -50,6 +46,11 @@ class TeamUpService:
                 return self.client.send(req)
 
         self.client.hooks['response'].append(response_hook)
+
+    def login(self):
+        # TODO 실패 처리
+        self.config = self.get_event_config()
+        self.login_with_password()
 
     def login_with_password(self):
         client_id = self.auth['client_id']
@@ -75,9 +76,7 @@ class TeamUpService:
 
         if response.status_code == 200:
             self.token = response.json()
-            session = requests.session()
-            session.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
-            return session
+            self.client.headers = {'Authorization': "{} {}".format(self.token['token_type'], self.token['access_token'])}
         else:
             logging.error("로그인에 실패했습니다.")
             sys.exit()
