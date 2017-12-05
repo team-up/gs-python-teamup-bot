@@ -5,6 +5,7 @@ import time
 import sys
 
 from event import ChatMessageEvent, UserDropEvent, UserPasswordChangedEvent
+from thread_pool import ThreadPool
 
 logger = logging.getLogger("teamup-bot")
 
@@ -12,6 +13,7 @@ class BaseBot:
     def __init__(self, service):
         self.service = service
         self.error_count = 0
+        self.thread_pool = ThreadPool()
 
     # thread-safe 하다고 나와있긴 하지만 보장이 되는지 고민해 봐야함
     # callback 패턴으로 바꾸는 것 고려
@@ -37,7 +39,7 @@ class BaseBot:
             try:
                 events = self.service.get_events()
                 if events:
-                    threading.Thread(target=self.handle_event, args=(events,)).start()
+                    self.thread_pool.add_task(self.handle_event, events)
                 time.sleep(self.service.config['lp_idle_time'])
             except Exception as e:
                 # TODO status code 를 확인하고 이 로직을 타야할지?
