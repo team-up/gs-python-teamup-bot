@@ -8,6 +8,7 @@ pip install -r requirements.txt
 ```
 
 ### configuration.json 포맷
+```
 {
   "client_id": "Your client id",
   "client_secret": "Your client secret",
@@ -15,6 +16,7 @@ pip install -r requirements.txt
   "password": "yourpwd",
   "button_bot": false
 }
+```
 
 client id / client secret 발급 문의 (https://tmup.com/main/developer)
 
