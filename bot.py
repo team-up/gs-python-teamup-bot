@@ -63,16 +63,15 @@ class TextBot(BaseBot):
 class ButtonBot(BaseBot):
     def __init__(self, service):
         super(ButtonBot, self).__init__(service)
-        self.test_extras = [
-            {
-                'version': 1,
-                'type': 'answer',
-                'msg_buttons': [
-                    {"type": "text", "text": "텍스트 버튼"},
-                    {"type": "url", "text": "구글", "url": "https://www.google.com"}
+        self.test_extras = {
+            "2": {
+                'type': 'bot',
+                'message_buttons': [
+                    {"type": "text", "button_text": "텍스트 버튼", "response_text": "텍스트 버튼"},
+                    {"type": "url", "button_text": "구글", "url": "https://www.google.com"}
                 ]
             }
-        ]
+        }
 
     def handle_chat(self, team_index, room_index, chat):
         if chat and chat.content == "Hello":
