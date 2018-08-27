@@ -4,9 +4,9 @@ import requests
 
 from event import EventFactory
 
-event_host = 'https://ev.tmup.com'
-auth_host = 'https://auth.tmup.com'
-edge_host = 'https://edge.tmup.com'
+event_host = 'https://test-ev.tmup.com'
+auth_host = 'https://test-auth.tmup.com'
+edge_host = 'https://test-edge.tmup.com'
 
 logger = logging.getLogger("teamup-bot")
 
@@ -17,6 +17,7 @@ class Chat:
         self.user_index = response_json['user']
         self.chat_type = response_json['type']
         self.content = response_json['content']
+        self.response_id = response_json['extras']['2']['response_id']
 
     def __str__(self):
         return "Msg Index : {}\nUser Index : {}\nType : {}\nContent : {}\n".format(self.index, self.user_index,
