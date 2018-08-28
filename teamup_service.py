@@ -17,7 +17,10 @@ class Chat:
         self.user_index = response_json['user']
         self.chat_type = response_json['type']
         self.content = response_json['content']
-        self.response_id = response_json['extras']['2']['response_id']
+        try:
+            self.response_id = response_json['extras']['2']['response_id']
+        except KeyError as e:
+            pass
 
     def __str__(self):
         return "Msg Index : {}\nUser Index : {}\nType : {}\nContent : {}\n".format(self.index, self.user_index,
@@ -37,24 +40,19 @@ class TeamUpService:
         self.my_index = None
 
         def response_hook(response, *args, **kwargs):
-            logger.debug("Request url : {}".format(response.request.url))
-            logger.debug("Response status code : {}".format(response.status_code))
-            logger.debug("Response text : {}".format(response.text))
             if response.status_code == 401:
                 token = self.refresh_token()
-                if token:
-                    logger.debug("token refreshed : {}".format(token))
-                else:
-                    logger.debug("refresh token failed. trying pwd credential : {}".format(token))
+                if not token:
                     token = self.login_with_password()
 
                 if token:
                     self.set_authorize_header(token)
                     req = response.request
-                    req.headers = {'Authorization': "{} {}".format(token['token_type'], token['access_token'])}
+                    req.headers = {
+                        'Authorization': "{} {}".format(token['token_type'], token['access_token'])
+                    }
                     return self.client.send(req)  # 재시도
                 else:
-                    logging.error("로그인에 실패했습니다.")
                     sys.exit()
 
         self.client.hooks['response'].append(response_hook)
