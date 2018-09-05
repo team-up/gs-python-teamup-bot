@@ -4,9 +4,9 @@ import requests
 
 from event import EventFactory
 
-event_host = 'https://test-ev.tmup.com'
-auth_host = 'https://test-auth.tmup.com'
-edge_host = 'https://test-edge.tmup.com'
+event_host = 'https://ev.tmup.com'
+auth_host = 'https://auth.tmup.com'
+edge_host = 'https://edge.tmup.com'
 
 logger = logging.getLogger("teamup-bot")
 
