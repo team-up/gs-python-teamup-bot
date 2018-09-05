@@ -20,7 +20,7 @@ class Chat:
         try:
             self.response_id = response_json['extras']['2']['response_id']
         except KeyError as e:
-            pass
+            self.response_id = None
 
     def __str__(self):
         return "Msg Index : {}\nUser Index : {}\nType : {}\nContent : {}\n".format(self.index, self.user_index,
